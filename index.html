@@ -151,6 +151,29 @@
       document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("keyup", handleKeyUp);
 
+      // Handle touch controls
+      const leftButton = document.getElementById("left-button");
+      const rightButton = document.getElementById("right-button");
+
+      let pressLeft = false;
+      let pressRight = false;
+
+      leftButton.addEventListener("touchstart", () => {
+        pressLeft = true;
+      });
+
+      leftButton.addEventListener("touchend", () => {
+        leftPressed = false;
+      });
+
+      rightButton.addEventListener("touchstart", () => {
+        pressRight = true;
+      });
+
+      rightButton.addEventListener("touchend", () => {
+        pressRight = false;
+      });
+
       // Update canvas size when the window is resized
       window.addEventListener("resize", () => {
         canvas.width = window.innerWidth;
