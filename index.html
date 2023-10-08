@@ -14,17 +14,23 @@
       canvas {
         display: block;
       }
+
+      /* Adjust the size of images for smaller screens */
+      @media (max-width: 600px) {
+        #gameCanvas {
+          width: 100%;
+          height: auto;
+        }
+
+        img {
+          width: 100px; /* Adjust the width of images for smaller screens */
+          height: 100px; /* Adjust the height of images for smaller screens */
+        }
+      }
     </style>
   </head>
   <body>
     <canvas id="gameCanvas"></canvas>
-
-    <div id="touch-controls">
-      <!-- Add your touch controls here -->
-      <button id="left-button">Left</button>
-      <button id="right-button">Right</button>
-    </div>
-
     <script>
       // JavaScript code goes here
 
@@ -77,12 +83,17 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Player movement
-        if (rightPressed && player.x < canvas.width - PLAYER_SIZE) {
-          player.x += PLAYER_SPEED;
+        if (isComputer && (rightPressed || leftPressed)) {
+          if (rightPressed) {
+            player.x += PLAYER_SPEED;
+          }
+          if (leftPressed) {
+            player.x -= PLAYER_SPEED;
+          }
         }
-        if (leftPressed && player.x > 0) {
-          player.x -= PLAYER_SPEED;
-        }
+
+        // Ensure player stays within the canvas bounds
+        player.x = Math.max(0, Math.min(player.x, canvas.width - PLAYER_SIZE));
 
         // Enemy movement and creation
         for (let i = 0; i < enemies.length; i++) {
@@ -128,51 +139,64 @@
         requestAnimationFrame(gameLoop);
       }
 
-      // Handle user input
-      let rightPressed = false;
+      // Handle touch controls
+      let touchStartX = 0;
+
+      canvas.addEventListener("touchstart", (e) => {
+        touchStartX = e.touches[0].clientX;
+      });
+
+      canvas.addEventListener("touchmove", (e) => {
+        const touchX = e.touches[0].clientX;
+        const deltaX = touchX - touchStartX;
+
+        if (deltaX > 0) {
+          // Move right
+          rightPressed = true;
+          leftPressed = false;
+        } else if (deltaX < 0) {
+          // Move left
+          leftPressed = true;
+          rightPressed = false;
+        }
+      });
+
+      canvas.addEventListener("touchend", () => {
+        // Stop moving when touch is released
+        leftPressed = false;
+        rightPressed = false;
+      });
+
+      // Keyboard arrow controls for computers
       let leftPressed = false;
+      let rightPressed = false;
+      let isComputer = true;
 
       function handleKeyDown(e) {
-        if (e.key == "Right" || e.key == "ArrowRight") {
-          rightPressed = true;
-        } else if (e.key == "Left" || e.key == "ArrowLeft") {
+        if (e.key === "ArrowLeft") {
           leftPressed = true;
+          rightPressed = false;
+        } else if (e.key === "ArrowRight") {
+          rightPressed = true;
+          leftPressed = false;
         }
       }
 
       function handleKeyUp(e) {
-        if (e.key == "Right" || e.key == "ArrowRight") {
-          rightPressed = false;
-        } else if (e.key == "Left" || e.key == "ArrowLeft") {
+        if (e.key === "ArrowLeft") {
           leftPressed = false;
+        } else if (e.key === "ArrowRight") {
+          rightPressed = false;
         }
       }
 
       document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("keyup", handleKeyUp);
 
-      // Handle touch controls
-      const leftButton = document.getElementById("left-button");
-      const rightButton = document.getElementById("right-button");
-
-      let pressLeft = false;
-      let pressRight = false;
-
-      leftButton.addEventListener("touchstart", () => {
-        pressLeft = true;
-      });
-
-      leftButton.addEventListener("touchend", () => {
-        leftPressed = false;
-      });
-
-      rightButton.addEventListener("touchstart", () => {
-        pressRight = true;
-      });
-
-      rightButton.addEventListener("touchend", () => {
-        pressRight = false;
-      });
+      // Detect if it's a mobile device
+      if (window.innerWidth <= 600) {
+        isComputer = false;
+      }
 
       // Update canvas size when the window is resized
       window.addEventListener("resize", () => {
