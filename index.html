@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Space Invaders</title>
+    <title>Guardianes de la Galaxia</title>
     <style>
       /* Set the background color to black */
       body {
@@ -23,8 +23,8 @@
         }
 
         img {
-          width: 200px; /* Adjust the width of images for smaller screens */
-          height: 200px; /* Adjust the height of images for smaller screens */
+          width: 300px; /* Adjust the width of images for smaller screens */
+          height: 300px; /* Adjust the height of images for smaller screens */
         }
       }
     </style>
@@ -45,8 +45,10 @@
       // Constants
       let PLAYER_SIZE = 90;
       let UFO_SIZE = 70;
-      let UFO_SPEED = 4; // Initial UFO speed
       const PLAYER_SPEED = 5;
+      let ENEMY_SPEED = 6; // Initial UFO falling speed
+      const SPEED_INCREASE_INTERVAL = 10000; // 10 seconds in milliseconds
+      let speedIncreaseTimer = 10; // Timer to track speed increase
 
       // Player
       const player = {
@@ -58,13 +60,11 @@
 
       // UFO icon image for enemies
       const ufoImage = new Image();
-      ufoImage.src = "ufo.png";
-      ufoImage.classList.add("enemy-img");
+      ufoImage.src = "ufo.png"; // Replace with the path to your UFO image
 
       // Rocket image for the player
       const rocketImage = new Image();
-      rocketImage.src = "rocket.png";
-      rocketImage.classList.add("player-img");
+      rocketImage.src = "rocket.png"; // Replace with the path to your rocket image
 
       // Enemies
       const enemies = [];
@@ -80,7 +80,7 @@
       }
 
       // Game loop
-      function gameLoop() {
+      function gameLoop(timestamp) {
         // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -99,14 +99,20 @@
 
         // Enemy movement and creation
         for (let i = 0; i < enemies.length; i++) {
-          enemies[i].y += UFO_SPEED;
+          enemies[i].y += ENEMY_SPEED;
           if (enemies[i].y > canvas.height) {
             enemies.splice(i, 1);
             i--;
           }
         }
 
-        if (Math.random() < 0.02) {
+        // Create more UFOs every 40 seconds
+        if (timestamp - lastUFOAppearance > SPEED_INCREASE_INTERVAL) {
+          ENEMY_SPEED += 1; // Increase the UFO falling speed
+          lastUFOAppearance = timestamp;
+        }
+
+        if (Math.random() < 0.05) {
           createEnemy();
         }
 
@@ -207,6 +213,7 @@
       });
 
       // Start the game loop
+      let lastUFOAppearance = 0; // Timestamp of the last UFO appearance
       gameLoop();
     </script>
   </body>
