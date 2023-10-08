@@ -1,12 +1,20 @@
+// JavaScript code goes here
+
 // Get the canvas element and its context
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+// Initialize canvas size based on the window size
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
 // Constants
-const PLAYER_SIZE = 50;
-const ENEMY_SIZE = 40;
+let PLAYER_SIZE = 90;
+let UFO_SIZE = 70;
 const PLAYER_SPEED = 5;
-const ENEMY_SPEED = 2;
+let ENEMY_SPEED = 6; // Initial UFO falling speed
+const SPEED_INCREASE_INTERVAL = 10000; // 10 seconds in milliseconds
+let speedIncreaseTimer = 10; // Timer to track speed increase
 
 // Player
 const player = {
@@ -16,31 +24,44 @@ const player = {
   height: PLAYER_SIZE,
 };
 
+// UFO icon image for enemies
+const ufoImage = new Image();
+ufoImage.src = "ufo.png"; // Replace with the path to your UFO image
+
+// Rocket image for the player
+const rocketImage = new Image();
+rocketImage.src = "rocket.png"; // Replace with the path to your rocket image
+
 // Enemies
 const enemies = [];
 
 function createEnemy() {
   const enemy = {
-    x: Math.random() * (canvas.width - ENEMY_SIZE),
-    y: 0 - ENEMY_SIZE,
-    width: ENEMY_SIZE,
-    height: ENEMY_SIZE,
+    x: Math.random() * (canvas.width - UFO_SIZE),
+    y: 0 - UFO_SIZE,
+    width: UFO_SIZE,
+    height: UFO_SIZE,
   };
   enemies.push(enemy);
 }
 
 // Game loop
-function gameLoop() {
+function gameLoop(timestamp) {
   // Clear the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Player movement
-  if (rightPressed && player.x < canvas.width - PLAYER_SIZE) {
-    player.x += PLAYER_SPEED;
+  if (isComputer && (rightPressed || leftPressed)) {
+    if (rightPressed) {
+      player.x += PLAYER_SPEED;
+    }
+    if (leftPressed) {
+      player.x -= PLAYER_SPEED;
+    }
   }
-  if (leftPressed && player.x > 0) {
-    player.x -= PLAYER_SPEED;
-  }
+
+  // Ensure player stays within the canvas bounds
+  player.x = Math.max(0, Math.min(player.x, canvas.width - PLAYER_SIZE));
 
   // Enemy movement and creation
   for (let i = 0; i < enemies.length; i++) {
@@ -51,32 +72,106 @@ function gameLoop() {
     }
   }
 
-  if (Math.random() < 0.02) {
+  // Create more UFOs every 40 seconds
+  if (timestamp - lastUFOAppearance > SPEED_INCREASE_INTERVAL) {
+    ENEMY_SPEED += 1; // Increase the UFO falling speed
+    lastUFOAppearance = timestamp;
+  }
+
+  if (Math.random() < 0.05) {
     createEnemy();
   }
 
   // Collision detection
   for (let i = 0; i < enemies.length; i++) {
     if (
-      player.x < enemies[i].x + ENEMY_SIZE &&
+      player.x < enemies[i].x + UFO_SIZE &&
       player.x + PLAYER_SIZE > enemies[i].x &&
-      player.y < enemies[i].y + ENEMY_SIZE &&
+      player.y < enemies[i].y + UFO_SIZE &&
       player.y + PLAYER_SIZE > enemies[i].y
     ) {
       // Handle collision (game over or score update)
+      document.location.reload();
     }
   }
 
-  // Draw everything
-  // ...
+  // Draw player as a larger rocket
+  ctx.drawImage(rocketImage, player.x, player.y, PLAYER_SIZE, PLAYER_SIZE);
+
+  // Draw enemies as UFO icons
+  for (const enemy of enemies) {
+    ctx.drawImage(ufoImage, enemy.x, enemy.y, UFO_SIZE, UFO_SIZE);
+  }
 
   // Request the next frame
   requestAnimationFrame(gameLoop);
 }
 
-// Handle user input
+// Handle touch controls
+let touchStartX = 0;
+
+canvas.addEventListener("touchstart", (e) => {
+  touchStartX = e.touches[0].clientX;
+});
+
+canvas.addEventListener("touchmove", (e) => {
+  const touchX = e.touches[0].clientX;
+  const deltaX = touchX - touchStartX;
+
+  if (deltaX > 0) {
+    // Move right
+    rightPressed = true;
+    leftPressed = false;
+  } else if (deltaX < 0) {
+    // Move left
+    leftPressed = true;
+    rightPressed = false;
+  }
+});
+
+canvas.addEventListener("touchend", () => {
+  // Stop moving when touch is released
+  leftPressed = false;
+  rightPressed = false;
+});
+
+// Keyboard arrow controls for computers
+let leftPressed = false;
+let rightPressed = false;
+let isComputer = true;
+
+function handleKeyDown(e) {
+  if (e.key === "ArrowLeft") {
+    leftPressed = true;
+    rightPressed = false;
+  } else if (e.key === "ArrowRight") {
+    rightPressed = true;
+    leftPressed = false;
+  }
+}
+
+function handleKeyUp(e) {
+  if (e.key === "ArrowLeft") {
+    leftPressed = false;
+  } else if (e.key === "ArrowRight") {
+    rightPressed = false;
+  }
+}
+
 document.addEventListener("keydown", handleKeyDown);
 document.addEventListener("keyup", handleKeyUp);
 
+// Detect if it's a mobile device
+if (window.innerWidth <= 600) {
+  isComputer = false;
+}
+
+// Update canvas size when the window is resized
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
 // Start the game loop
+let lastUFOAppearance = 0; // Timestamp of the last UFO appearance
 gameLoop();
