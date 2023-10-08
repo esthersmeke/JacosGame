@@ -2,35 +2,16 @@
 <html>
   <head>
     <title>Guardianes de la Galaxia</title>
-    <style>
-      /* Set the background color to black */
-      body {
-        margin: 0;
-        overflow: hidden;
-        background-color: black;
-      }
-
-      /* Make the canvas responsive */
-      canvas {
-        display: block;
-      }
-
-      /* Adjust the size of images for smaller screens */
-      @media (max-width: 600px) {
-        #gameCanvas {
-          width: 100%;
-          height: auto;
-        }
-
-        img {
-          width: 300px; /* Adjust the width of images for smaller screens */
-          height: 300px; /* Adjust the height of images for smaller screens */
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <canvas id="gameCanvas"></canvas>
+    <div class="bg-animation">
+      <div id="stars"></div>
+      <div id="stars2"></div>
+      <div id="stars3"></div>
+      <div id="stars4"></div>
+    </div>
     <script>
       // JavaScript code goes here
 
