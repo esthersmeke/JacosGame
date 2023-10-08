@@ -23,8 +23,8 @@
         }
 
         img {
-          width: 100px; /* Adjust the width of images for smaller screens */
-          height: 100px; /* Adjust the height of images for smaller screens */
+          width: 200px; /* Adjust the width of images for smaller screens */
+          height: 200px; /* Adjust the height of images for smaller screens */
         }
       }
     </style>
@@ -43,10 +43,10 @@
       canvas.height = window.innerHeight;
 
       // Constants
-      const PLAYER_SIZE = 70;
-      const UFO_SIZE = 50;
+      let PLAYER_SIZE = 90;
+      let UFO_SIZE = 70;
+      let UFO_SPEED = 4; // Initial UFO speed
       const PLAYER_SPEED = 5;
-      const ENEMY_SPEED = 4;
 
       // Player
       const player = {
@@ -58,11 +58,13 @@
 
       // UFO icon image for enemies
       const ufoImage = new Image();
-      ufoImage.src = "ufo.png"; // Replace with the path to your UFO image
+      ufoImage.src = "ufo.png";
+      ufoImage.classList.add("enemy-img");
 
       // Rocket image for the player
       const rocketImage = new Image();
-      rocketImage.src = "rocket.png"; // Replace with the path to your rocket image
+      rocketImage.src = "rocket.png";
+      rocketImage.classList.add("player-img");
 
       // Enemies
       const enemies = [];
@@ -97,7 +99,7 @@
 
         // Enemy movement and creation
         for (let i = 0; i < enemies.length; i++) {
-          enemies[i].y += ENEMY_SPEED;
+          enemies[i].y += UFO_SPEED;
           if (enemies[i].y > canvas.height) {
             enemies.splice(i, 1);
             i--;
