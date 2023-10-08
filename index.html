@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Space Invaders</title>
+    <style>
+      /* Set the background color to black */
+      body {
+        margin: 0;
+        overflow: hidden;
+        background-color: black;
+      }
+
+      /* Make the canvas responsive */
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+      // JavaScript code goes here
+
+      // Get the canvas element and its context
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // Initialize canvas size based on the window size
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // Constants
+      const PLAYER_SIZE = 70;
+      const UFO_SIZE = 50;
+      const PLAYER_SPEED = 5;
+      const ENEMY_SPEED = 4;
+
+      // Player
+      const player = {
+        x: canvas.width / 2 - PLAYER_SIZE / 2,
+        y: canvas.height - 2 * PLAYER_SIZE,
+        width: PLAYER_SIZE,
+        height: PLAYER_SIZE,
+      };
+
+      // UFO icon image for enemies
+      const ufoImage = new Image();
+      ufoImage.src = "ufo.png"; // Replace with the path to your UFO image
+
+      // Rocket image for the player
+      const rocketImage = new Image();
+      rocketImage.src = "rocket.png"; // Replace with the path to your rocket image
+
+      // Enemies
+      const enemies = [];
+
+      function createEnemy() {
+        const enemy = {
+          x: Math.random() * (canvas.width - UFO_SIZE),
+          y: 0 - UFO_SIZE,
+          width: UFO_SIZE,
+          height: UFO_SIZE,
+        };
+        enemies.push(enemy);
+      }
+
+      // Game loop
+      function gameLoop() {
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Player movement
+        if (rightPressed && player.x < canvas.width - PLAYER_SIZE) {
+          player.x += PLAYER_SPEED;
+        }
+        if (leftPressed && player.x > 0) {
+          player.x -= PLAYER_SPEED;
+        }
+
+        // Enemy movement and creation
+        for (let i = 0; i < enemies.length; i++) {
+          enemies[i].y += ENEMY_SPEED;
+          if (enemies[i].y > canvas.height) {
+            enemies.splice(i, 1);
+            i--;
+          }
+        }
+
+        if (Math.random() < 0.02) {
+          createEnemy();
+        }
+
+        // Collision detection
+        for (let i = 0; i < enemies.length; i++) {
+          if (
+            player.x < enemies[i].x + UFO_SIZE &&
+            player.x + PLAYER_SIZE > enemies[i].x &&
+            player.y < enemies[i].y + UFO_SIZE &&
+            player.y + PLAYER_SIZE > enemies[i].y
+          ) {
+            // Handle collision (game over or score update)
+            document.location.reload();
+          }
+        }
+
+        // Draw player as a larger rocket
+        ctx.drawImage(
+          rocketImage,
+          player.x,
+          player.y,
+          PLAYER_SIZE,
+          PLAYER_SIZE
+        );
+
+        // Draw enemies as UFO icons
+        for (const enemy of enemies) {
+          ctx.drawImage(ufoImage, enemy.x, enemy.y, UFO_SIZE, UFO_SIZE);
+        }
+
+        // Request the next frame
+        requestAnimationFrame(gameLoop);
+      }
+
+      // Handle user input
+      let rightPressed = false;
+      let leftPressed = false;
+
+      function handleKeyDown(e) {
+        if (e.key == "Right" || e.key == "ArrowRight") {
+          rightPressed = true;
+        } else if (e.key == "Left" || e.key == "ArrowLeft") {
+          leftPressed = true;
+        }
+      }
+
+      function handleKeyUp(e) {
+        if (e.key == "Right" || e.key == "ArrowRight") {
+          rightPressed = false;
+        } else if (e.key == "Left" || e.key == "ArrowLeft") {
+          leftPressed = false;
+        }
+      }
+
+      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keyup", handleKeyUp);
+
+      // Update canvas size when the window is resized
+      window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      // Start the game loop
+      gameLoop();
+    </script>
+  </body>
+</html>
