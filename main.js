@@ -11,10 +11,10 @@ canvas.height = window.innerHeight;
 // Constants
 let PLAYER_SIZE = 90;
 let UFO_SIZE = 70;
-const PLAYER_SPEED = 5;
-let ENEMY_SPEED = 6; // Initial UFO falling speed
+const PLAYER_SPEED = 8;
+let ENEMY_SPEED = 4; // Initial UFO falling speed
 const SPEED_INCREASE_INTERVAL = 10000; // 10 seconds in milliseconds
-let speedIncreaseTimer = 10; // Timer to track speed increase
+let speedIncreaseTimer = 1; // Timer to track speed increase
 
 // Player
 const player = {
@@ -78,7 +78,7 @@ function gameLoop(timestamp) {
     lastUFOAppearance = timestamp;
   }
 
-  if (Math.random() < 0.05) {
+  if (Math.random() < 0.04) {
     createEnemy();
   }
 
