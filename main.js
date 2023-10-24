@@ -1,12 +1,24 @@
-// JavaScript code goes here
-
-// Get the canvas element and its context
+// Get references to the start screen and game canvas
+const startScreen = document.getElementById("startScreen");
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 // Initialize canvas size based on the window size
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+resizeCanvas();
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+// Call resizeCanvas when the window is resized
+window.addEventListener("resize", resizeCanvas);
+
+// Get the "START" button
+const startButton = document.getElementById("startButton");
+
+// Hide the game canvas initially
+canvas.style.display = "none";
 
 // Constants
 let PLAYER_SIZE = 90;
@@ -15,6 +27,7 @@ const PLAYER_SPEED = 8;
 let ENEMY_SPEED = 4; // Initial UFO falling speed
 const SPEED_INCREASE_INTERVAL = 10000; // 10 seconds in milliseconds
 let speedIncreaseTimer = 1; // Timer to track speed increase
+let lastUFOAppearance = 0; // Initialize lastUFOAppearance
 
 // Player
 const player = {
@@ -43,6 +56,55 @@ function createEnemy() {
     height: UFO_SIZE,
   };
   enemies.push(enemy);
+}
+
+// Bullets
+const bullets = [];
+
+// Function to handle player shooting
+function shoot() {
+  const bullet = {
+    x: player.x + PLAYER_SIZE / 2,
+    y: player.y,
+    width: 5, // Adjust the bullet size as needed
+    height: 10, // Adjust the bullet size as needed
+  };
+  bullets.push(bullet);
+}
+
+// Function to update and draw bullets
+function updateBullets() {
+  for (let i = 0; i < bullets.length; i++) {
+    bullets[i].y -= 10; // Adjust the bullet speed as needed
+
+    // Remove bullets that go off the screen
+    if (bullets[i] && bullets[i].y < 0) {
+      bullets.splice(i, 1);
+      i--;
+    }
+  }
+}
+
+// Collision detection between bullets and enemies
+function checkBulletEnemyCollisions() {
+  for (let i = 0; i < bullets.length; i++) {
+    for (let j = 0; j < enemies.length; j++) {
+      if (
+        bullets[i] &&
+        enemies[j] &&
+        bullets[i].x < enemies[j].x + UFO_SIZE &&
+        bullets[i].x + bullets[i].width > enemies[j].x &&
+        bullets[i].y < enemies[j].y + UFO_SIZE &&
+        bullets[i].y + bullets[i].height > enemies[j].y
+      ) {
+        // Remove the bullet and the enemy on collision
+        bullets.splice(i, 1);
+        i--;
+        enemies.splice(j, 1);
+        j--;
+      }
+    }
+  }
 }
 
 // Game loop
@@ -82,6 +144,17 @@ function gameLoop(timestamp) {
     createEnemy();
   }
 
+  // Player shooting logic
+  if (isComputer && spacePressed) {
+    shoot();
+  }
+
+  // Update and draw bullets
+  updateBullets();
+
+  // Check for bullet-enemy collisions
+  checkBulletEnemyCollisions();
+
   // Collision detection
   for (let i = 0; i < enemies.length; i++) {
     if (
@@ -101,6 +174,12 @@ function gameLoop(timestamp) {
   // Draw enemies as UFO icons
   for (const enemy of enemies) {
     ctx.drawImage(ufoImage, enemy.x, enemy.y, UFO_SIZE, UFO_SIZE);
+  }
+
+  // Draw bullets
+  for (const bullet of bullets) {
+    ctx.fillStyle = "red";
+    ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
   }
 
   // Request the next frame
@@ -138,7 +217,11 @@ canvas.addEventListener("touchend", () => {
 // Keyboard arrow controls for computers
 let leftPressed = false;
 let rightPressed = false;
+let spacePressed = false;
 let isComputer = true;
+
+// Boolean to track if the spacebar is currently held down
+let spaceKeyDown = false;
 
 function handleKeyDown(e) {
   if (e.key === "ArrowLeft") {
@@ -147,6 +230,12 @@ function handleKeyDown(e) {
   } else if (e.key === "ArrowRight") {
     rightPressed = true;
     leftPressed = false;
+  } else if (e.key === " ") {
+    if (!spaceKeyDown) {
+      spacePressed = true;
+      spaceKeyDown = true;
+      shoot();
+    }
   }
 }
 
@@ -155,6 +244,9 @@ function handleKeyUp(e) {
     leftPressed = false;
   } else if (e.key === "ArrowRight") {
     rightPressed = false;
+  } else if (e.key === " ") {
+    spacePressed = false;
+    spaceKeyDown = false; // Set it to false when spacebar is released
   }
 }
 
@@ -172,6 +264,11 @@ window.addEventListener("resize", () => {
   canvas.height = window.innerHeight;
 });
 
-// Start the game loop
-let lastUFOAppearance = 0; // Timestamp of the last UFO appearance
-gameLoop();
+// Event listener to start the game when the "START" button is clicked
+startButton.addEventListener("click", () => {
+  startScreen.style.display = "none"; // Hide the start screen
+  canvas.style.display = "block"; // Display the game canvas
+
+  // Start the game loop
+  requestAnimationFrame(gameLoop);
+});
