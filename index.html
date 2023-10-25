@@ -1,11 +1,27 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guardianes de la Galaxia</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
   </head>
+
   <body>
-    <canvas id="gameCanvas"></canvas>
+    <div class="bg-container"></div>
+    <!-- Start screen -->
+    <div id="startScreen" class="screen">
+      <div class="container">
+        <h1 class="title" data-text="GUARDIANES DE LA GALAXIA">Guardianes de la Galaxia</h1>
+        <button id="startButton">EMPEZAR</button>
+      </div>
+    </div>
+
+    <!-- Game screen -->
+    <canvas id="gameCanvas" class="screen"></canvas>
     <script src="main.js"></script>
   </body>
 </html>
